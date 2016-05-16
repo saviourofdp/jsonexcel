@@ -1,7 +1,7 @@
 flat = require('flatjson');
 xlsx = require('node-xlsx');
 
-module.exports = function (obj, sheetname, delimiter, filter) {
+function createSheet(obj, sheetname, delimiter, filter) {
     var sheet = sheetname || "Sheet 1";
     
     var input = [];
@@ -34,6 +34,24 @@ module.exports = function (obj, sheetname, delimiter, filter) {
         }
         data.push(actual_data);
     }
-    var buffer = xlsx.build([{name: sheet, data: data}]);
-    return buffer;
+    return {
+        name: sheet,
+        data: data
+    }
+}
+
+module.exports = function (options) {
+    
+    if(!(options instanceof Array)) {
+        options = [options];    
+    }
+    var sheets = options.map(function(value, index, array) {
+        return createSheet(
+            value.obj,
+            value.sheetname,
+            value.delimiter,
+            value.filter
+        );
+    });
+    return xlsx.build(sheets);
 }
